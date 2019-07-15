@@ -31,7 +31,7 @@ namespace SendGridEmailSystem
                 EmailsToSend.Add(new EmailAddress() { Email = To, Name = DisplayName });
                 Console.WriteLine("Sending Email...");
                 if (Program.SendEmail(EmailsToSend, EmailBody, Subject))
-                    Console.WriteLine("Email send successfully on " + DateTime.Now);
+                    Console.WriteLine("Email sent successfully on " + DateTime.Now);
             }
             catch (Exception e)
             {
