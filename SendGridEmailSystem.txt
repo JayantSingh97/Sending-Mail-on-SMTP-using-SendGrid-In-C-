@@ -1,0 +1,69 @@
+using System;
+using SendGrid;
+using SendGrid.Helpers.Mail;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Mail;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SendGridEmailSystem
+{
+    public class Program
+    {
+        public static string To = string.Empty;
+        public static string DisplayName = string.Empty;
+        public static string EmailBody = string.Empty;
+        public static string Subject = string.Empty;
+        public static string From = string.Empty;
+        private static readonly string Account = System.Configuration.ConfigurationManager.AppSettings["Account"].ToString();
+        private static readonly string Key = System.Configuration.ConfigurationManager.AppSettings["SendGridKey"].ToString();
+
+
+        static void Main(string[] args)
+        {
+            try
+            {
+                //this is send grid EmailAddress class where you can add the email address on which you want to send the email.
+                List<EmailAddress> EmailsToSend = new List<EmailAddress>();
+
+                EmailsToSend.Add(new EmailAddress() { Email = To, Name = DisplayName });
+                Console.WriteLine("Sending Email...");
+                if (Program.SendEmail(EmailsToSend, EmailBody, Subject))
+                    Console.WriteLine("Email send successfully on " + DateTime.Now);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Email could not be sent due to Following issue !");
+                Console.WriteLine(e.Message + e.InnerException + "\n" + e.StackTrace.ToString());
+            }
+
+        }
+
+        private static bool SendEmail(List<EmailAddress> EmailsToSend, string body, string subject)
+        {
+             
+            MailMessage mailMessage = new MailMessage();
+            MailAddress from = new MailAddress(From, DisplayName);
+            mailMessage.From = from;
+            foreach (var email in EmailsToSend)
+            {
+                mailMessage.To.Add(email.Email.ToString());
+            }
+
+            mailMessage.Body = body;
+            mailMessage.Subject = subject;
+            mailMessage.IsBodyHtml = true;
+            SmtpClient mailClient = new SmtpClient("smtp.sendgrid.net", 587);
+            mailClient.EnableSsl = true;
+            mailClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+            mailClient.UseDefaultCredentials = false;
+            mailClient.Timeout = 40000;
+            mailClient.Credentials = new NetworkCredential(Account, Key);
+            mailClient.Send(mailMessage);
+            mailClient.Dispose();
+            return true;
+        }
+    }
+}
